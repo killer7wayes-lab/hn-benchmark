@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>House Nutrition — Veille concurrence</title>
+<link rel="stylesheet" href="tailwind.css">
+<style>
+  body { font-family: ui-sans-serif, system-ui, "Segoe UI", Roboto, sans-serif; }
+  .tab[aria-selected="true"] { background:#111827; color:#fff; }
+  .clamp { display:-webkit-box; -webkit-line-clamp:5; -webkit-box-orient:vertical; overflow:hidden; }
+  .num { font-variant-numeric: tabular-nums; }
+  details > summary { list-style:none; cursor:pointer; } details > summary::-webkit-details-marker { display:none; }
+</style>
+</head>
+<body class="bg-slate-50 text-slate-900">
+<header class="bg-white border-b border-slate-200 sticky top-0 z-10">
+  <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap items-center gap-3">
+    <div class="mr-auto">
+      <h1 class="text-lg font-bold leading-tight">House Nutrition <span class="font-normal text-slate-500">· Veille concurrence</span></h1>
+      <p id="updated" class="text-xs text-slate-500"></p>
+    </div>
+    <nav class="flex flex-wrap gap-1 text-sm" role="tablist">
+      <button class="tab px-3 py-1.5 rounded-lg bg-slate-100" role="tab" data-tab="prix" aria-selected="true">Comparatif prix</button>
+      <button class="tab px-3 py-1.5 rounded-lg bg-slate-100" role="tab" data-tab="ads" aria-selected="false">Publicités actives</button>
+      <button class="tab px-3 py-1.5 rounded-lg bg-slate-100" role="tab" data-tab="packs" aria-selected="false">Packs concurrents</button>
+      <button class="tab px-3 py-1.5 rounded-lg bg-slate-100" role="tab" data-tab="log" aria-selected="false">Collecte</button>
+    </nav>
+  </div>
+</header>
+
+<main class="max-w-7xl mx-auto px-4 py-5">
+  <div id="nodata" class="hidden bg-amber-50 border border-amber-200 rounded-xl p-6 text-amber-900">
+    Aucune donnée pour l'instant. Lancez <b>run.bat</b> puis rechargez cette page.
+  </div>
+
+  <!-- PRIX -->
+  <section id="tab-prix">
+    <div id="stats" class="grid grid-cols-2 md:grid-cols-5 gap-3 mb-4"></div>
+    <div class="bg-white rounded-xl border border-slate-200 p-3 mb-3 flex flex-wrap gap-2 items-center text-sm">
+      <input id="p-q" type="search" placeholder="Rechercher un produit…" class="border border-slate-300 rounded-lg px-3 py-1.5 w-full sm:w-64">
+      <select id="p-filter" class="border border-slate-300 rounded-lg px-2 py-1.5">
+        <option value="all">Tous les produits</option>
+        <option value="more">HN plus cher</option>
+        <option value="less">HN moins cher</option>
+        <option value="same">Même prix</option>
+        <option value="none">Sans concurrent trouvé</option>
+      </select>
+      <select id="p-brand" class="border border-slate-300 rounded-lg px-2 py-1.5"><option value="">Toutes les marques</option></select>
+      <select id="p-sort" class="border border-slate-300 rounded-lg px-2 py-1.5">
+        <option value="gap">Tri : écart (HN le plus cher d'abord)</option>
+        <option value="name">Tri : nom</option>
+        <option value="shops">Tri : nombre de concurrents</option>
+      </select>
+      <label class="flex items-center gap-1.5 text-slate-600"><input id="p-unsure" type="checkbox"> Inclure les correspondances à vérifier</label>
+      <span id="p-count" class="ml-auto text-slate-500"></span>
+    </div>
+    <div class="bg-white rounded-xl border border-slate-200 overflow-hidden">
+      <div class="hidden md:grid grid-cols-12 gap-2 px-4 py-2 text-xs font-semibold uppercase tracking-wide text-slate-500 bg-slate-50 border-b border-slate-200">
+        <div class="col-span-5">Produit House Nutrition</div><div class="col-span-2 text-right">Prix HN</div>
+        <div class="col-span-3">Concurrent le moins cher</div><div class="col-span-2 text-right">Écart</div>
+      </div>
+      <div id="p-rows"></div>
+    </div>
+    <p id="p-note" class="text-xs text-slate-500 mt-2"></p>
+  </section>
+
+  <!-- ADS -->
+  <section id="tab-ads" class="hidden">
+    <div id="a-chips" class="flex flex-wrap gap-2 mb-3"></div>
+    <div class="bg-white rounded-xl border border-slate-200 p-3 mb-3 flex flex-wrap gap-3 items-center text-sm">
+      <input id="a-q" type="search" placeholder="Rechercher dans les publicités…" class="border border-slate-300 rounded-lg px-3 py-1.5 w-full sm:w-64">
+      <label class="flex items-center gap-1.5"><input id="a-price" type="checkbox"> Avec prix</label>
+      <label class="flex items-center gap-1.5"><input id="a-pack" type="checkbox"> Packs</label>
+      <label class="flex items-center gap-1.5"><input id="a-promo" type="checkbox"> Promo / remise</label>
+      <label class="flex items-center gap-1.5"><input id="a-known" type="checkbox" checked> Concurrents suivis seulement</label>
+      <span id="a-count" class="ml-auto text-slate-500"></span>
+    </div>
+    <div id="a-grid" class="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"></div>
+  </section>
+
+  <!-- PACKS -->
+  <section id="tab-packs" class="hidden">
+    <div class="bg-white rounded-xl border border-slate-200 p-3 mb-3 flex flex-wrap gap-2 items-center text-sm">
+      <input id="k-q" type="search" placeholder="Rechercher un pack…" class="border border-slate-300 rounded-lg px-3 py-1.5 w-full sm:w-64">
+      <select id="k-shop" class="border border-slate-300 rounded-lg px-2 py-1.5"><option value="">Toutes les boutiques</option></select>
+      <select id="k-src" class="border border-slate-300 rounded-lg px-2 py-1.5">
+        <option value="">Sites + publicités</option><option value="site">Sites web</option><option value="pub">Publicités</option>
+      </select>
+      <select id="k-sort" class="border border-slate-300 rounded-lg px-2 py-1.5">
+        <option value="disc">Tri : plus grosse remise</option><option value="asc">Tri : prix croissant</option><option value="desc">Tri : prix décroissant</option>
+      </select>
+      <label class="flex items-center gap-1.5"><input id="k-own" type="checkbox"> Afficher aussi les packs House Nutrition</label>
+      <span id="k-count" class="ml-auto text-slate-500"></span>
+    </div>
+    <div id="k-grid" class="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"></div>
+  </section>
+
+  <!-- LOG -->
+  <section id="tab-log" class="hidden">
+    <div class="bg-white rounded-xl border border-slate-200 overflow-x-auto">
+      <table class="w-full text-sm">
+        <thead class="bg-slate-50 text-xs uppercase text-slate-500"><tr>
+          <th class="text-left px-4 py-2">Boutique</th><th class="text-left px-4 py-2">Méthode</th>
+          <th class="text-right px-4 py-2">Produits</th><th class="text-right px-4 py-2">En stock</th>
+          <th class="text-left px-4 py-2">Date</th><th class="text-left px-4 py-2">Remarque</th></tr></thead>
+        <tbody id="l-rows"></tbody>
+      </table>
+    </div>
+    <p id="l-note" class="text-xs text-slate-500 mt-2"></p>
+  </section>
+</main>
+
+<script src="data.js"></script>
+<script>
+const D = window.DATA || null;
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const dt = n => (n == null ? "" : (Math.round(n * 100) / 100).toLocaleString("fr-FR", {maximumFractionDigits: 2}) + " DT");
+const safeUrl = u => /^https?:\/\//i.test(u || "") ? esc(u) : "#";
+const norm = s => String(s || "").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
+
+document.querySelectorAll(".tab").forEach(b => b.onclick = () => {
+  document.querySelectorAll(".tab").forEach(x => x.setAttribute("aria-selected", x === b));
+  ["prix", "ads", "packs", "log"].forEach(t => $("tab-" + t).classList.toggle("hidden", t !== b.dataset.tab));
+});
+
+const openTab = t => { const b = document.querySelector(`.tab[data-tab="${t}"]`); if (b) b.click(); };
+if (location.hash) openTab(location.hash.slice(1));
+if (!D || !D.products) { $("nodata").classList.remove("hidden"); }
+else {
+  /* untracked advertisers: keep only real sports-supplement sellers */
+  const STRONG = /whey|cr[ée]atine|gainer|bcaa|\beaa\b|pre.?workout|isolate|كرياتين|واي بروتين/i;
+  const ADV_OK = /nutrition|protein|whey|muscle|suppl|gym|fitness/i, ADV_NO = /beaut|cosm|\bspa\b|calorie|\bapp\b|pharma|\bbio\b|hair|esth|coiff|clinic|diet/i;
+  D.ads = D.ads.filter(a => a.competitor || ((STRONG.test(a.text) || ADV_OK.test(a.advertiser)) && !ADV_NO.test(a.advertiser)));
+  $("updated").textContent = "Mis à jour le " + D.updated + " · produits en rupture de stock exclus";
+
+  /* ---------- PRIX ---------- */
+  const view = p => {
+    const ms = p.matches.filter(m => m.sure || $("p-unsure").checked);
+    const best = ms[0] || null;
+    const gap = best ? p.price - best.price : null;
+    return {p, ms, best, gap, pct: best ? gap / best.price * 100 : null};
+  };
+  const brands = [...new Set(D.products.map(p => p.brand).filter(Boolean))].sort((a, b) => a.localeCompare(b));
+  $("p-brand").innerHTML += brands.map(b => `<option>${esc(b)}</option>`).join("");
+
+  function gapBadge(v) {
+    if (!v.best) return `<span class="text-slate-400">—</span>`;
+    if (Math.abs(v.gap) < 0.5) return `<span class="px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 text-xs font-medium">Même prix</span>`;
+    const more = v.gap > 0;
+    return `<span class="px-2 py-0.5 rounded-full text-xs font-semibold ${more ? "bg-red-100 text-red-700" : "bg-emerald-100 text-emerald-700"}">
+      ${more ? "+" : "−"}${dt(Math.abs(v.gap))} (${more ? "+" : "−"}${Math.abs(v.pct).toFixed(0)} %)</span>`;
+  }
+  function renderPrix() {
+    const all = D.products.map(view);
+    const withC = all.filter(v => v.best);
+    const more = withC.filter(v => v.gap >= 0.5).length, less = withC.filter(v => v.gap <= -0.5).length;
+    const tile = (n, l, c = "") => `<div class="bg-white rounded-xl border border-slate-200 p-3"><div class="text-2xl font-bold num ${c}">${n}</div><div class="text-xs text-slate-500">${l}</div></div>`;
+    $("stats").innerHTML = tile(all.length, "produits HN en stock") + tile(withC.length, "comparés à un concurrent")
+      + tile(more, "HN plus cher", "text-red-600") + tile(less, "HN moins cher", "text-emerald-600")
+      + tile(withC.length - more - less, "au même prix");
+    const q = norm($("p-q").value), f = $("p-filter").value, br = $("p-brand").value, s = $("p-sort").value;
+    let rows = all.filter(v => (!q || norm(v.p.name + " " + v.p.brand).includes(q)) && (!br || v.p.brand === br) && (
+      f === "all" || (f === "none" && !v.best) || (v.best && ((f === "more" && v.gap >= 0.5) || (f === "less" && v.gap <= -0.5) || (f === "same" && Math.abs(v.gap) < 0.5)))));
+    rows.sort(s === "name" ? (a, b) => a.p.name.localeCompare(b.p.name)
+      : s === "shops" ? (a, b) => b.ms.length - a.ms.length
+      : (a, b) => (b.pct ?? -1e9) - (a.pct ?? -1e9));
+    $("p-count").textContent = rows.length + " produit(s)";
+    $("p-rows").innerHTML = rows.map(v => `
+      <details class="border-b border-slate-100 last:border-0">
+        <summary class="grid grid-cols-12 gap-2 px-4 py-2.5 items-center text-sm hover:bg-slate-50">
+          <div class="col-span-12 md:col-span-5"><a class="font-medium hover:underline" href="${safeUrl(v.p.url)}" target="_blank" rel="noopener" onclick="event.stopPropagation()">${esc(v.p.name)}</a>
+            ${v.p.brand ? `<span class="text-xs text-slate-400 ml-1">${esc(v.p.brand)}</span>` : ""}</div>
+          <div class="col-span-4 md:col-span-2 md:text-right font-semibold num">${dt(v.p.price)}</div>
+          <div class="col-span-8 md:col-span-3">${v.best ? `<span class="num font-semibold">${dt(v.best.price)}</span> <span class="text-slate-500">· ${esc(v.best.shop)}</span>${v.ms.length > 1 ? ` <span class="text-xs text-slate-400">+${v.ms.length - 1}</span>` : ""}` : `<span class="text-slate-400">Aucun concurrent trouvé</span>`}</div>
+          <div class="col-span-12 md:col-span-2 md:text-right">${gapBadge(v)}</div>
+        </summary>
+        ${v.ms.length ? `<div class="px-4 pb-3"><table class="w-full text-xs bg-slate-50 rounded-lg overflow-hidden">
+          ${v.ms.map(m => { const g = v.p.price - m.price; return `<tr class="border-b border-white last:border-0">
+            <td class="px-3 py-1.5 font-medium whitespace-nowrap">${esc(m.shop)}</td>
+            <td class="px-3 py-1.5"><a class="hover:underline" href="${safeUrl(m.url)}" target="_blank" rel="noopener">${esc(m.name)}</a>${m.sure ? "" : ` <span class="px-1.5 rounded bg-amber-100 text-amber-800">à vérifier</span>`}</td>
+            <td class="px-3 py-1.5 text-right num whitespace-nowrap">${m.regular ? `<s class="text-slate-400">${dt(m.regular)}</s> ` : ""}<b>${dt(m.price)}</b></td>
+            <td class="px-3 py-1.5 text-right num whitespace-nowrap ${g >= 0.5 ? "text-red-600" : g <= -0.5 ? "text-emerald-600" : "text-slate-500"}">${g >= 0.5 ? "HN +" + dt(g) : g <= -0.5 ? "HN −" + dt(-g) : "="}</td></tr>`; }).join("")}
+        </table></div>` : ""}
+      </details>`).join("") || `<div class="p-6 text-sm text-slate-500">Aucun produit ne correspond à ces filtres.</div>`;
+    $("p-note").textContent = `Écart = prix HN − prix du concurrent le moins cher. Rouge : HN est plus cher. Cliquez sur une ligne pour voir toutes les boutiques. Masqués car en rupture : ${D.hidden_out_of_stock.hn} produits HN, ${D.hidden_out_of_stock.competitors} produits concurrents.`;
+  }
+  ["p-q", "p-filter", "p-brand", "p-sort", "p-unsure"].forEach(i => $(i).addEventListener("input", renderPrix));
+  renderPrix();
+
+  /* ---------- ADS ---------- */
+  let advFilter = "";
+  const advName = a => a.competitor || a.advertiser || "Inconnu";
+  function renderAds() {
+    const counts = {};
+    const pool = D.ads.filter(a => !$("a-known").checked || a.competitor);
+    pool.forEach(a => counts[advName(a)] = (counts[advName(a)] || 0) + 1);
+    if (advFilter && !counts[advFilter]) advFilter = "";
+    $("a-chips").innerHTML = Object.entries(counts).sort((a, b) => b[1] - a[1]).map(([n, c]) =>
+      `<button data-adv="${esc(n)}" class="px-2.5 py-1 rounded-full text-xs border ${advFilter === n ? "bg-slate-900 text-white border-slate-900" : "bg-white border-slate-300 hover:border-slate-500"}">${esc(n)} <b>${c}</b></button>`).join("");
+    $("a-chips").querySelectorAll("button").forEach(b => b.onclick = () => { advFilter = advFilter === b.dataset.adv ? "" : b.dataset.adv; renderAds(); });
+    const q = norm($("a-q").value);
+    const rows = D.ads.filter(a => (!advFilter || advName(a) === advFilter) && (!q || norm(a.text + " " + a.advertiser).includes(q))
+      && (!$("a-price").checked || a.new_price) && (!$("a-pack").checked || a.is_pack)
+      && (!$("a-promo").checked || a.old_price || a.discounts || /promo|solde|remise|friday|offre/.test(a.promo_words || ""))
+      && (!$("a-known").checked || a.competitor));
+    $("a-count").textContent = rows.length + " publicité(s)";
+    $("a-grid").innerHTML = rows.map(a => `
+      <article class="bg-white rounded-xl border border-slate-200 overflow-hidden flex flex-col">
+        ${a.image ? `<img src="${esc(a.image)}" alt="" loading="lazy" class="w-full aspect-square object-cover bg-slate-100">` : `<div class="w-full aspect-[4/3] bg-slate-100 grid place-items-center text-xs text-slate-400">Vidéo / pas d'image</div>`}
+        <div class="p-3 flex flex-col gap-2 grow">
+          <div class="flex items-start justify-between gap-2">
+            <div><div class="font-semibold text-sm leading-tight">${esc(a.advertiser)}</div>
+              <div class="text-xs text-slate-500">${a.started ? "Depuis le " + esc(a.started) : ""}</div></div>
+            ${a.competitor ? "" : `<span class="shrink-0 px-1.5 py-0.5 rounded bg-violet-100 text-violet-700 text-[10px] font-semibold">NON SUIVI</span>`}
+          </div>
+          <div class="flex flex-wrap gap-1 text-xs">
+            ${a.new_price ? `<span class="px-2 py-0.5 rounded-full bg-slate-900 text-white font-semibold num">${a.old_price ? `<s class="opacity-60 font-normal">${dt(a.old_price)}</s> ` : ""}${dt(a.new_price)}</span>` : ""}
+            ${a.discounts ? `<span class="px-2 py-0.5 rounded-full bg-red-100 text-red-700 font-semibold">${esc(a.discounts)}</span>` : ""}
+            ${a.is_pack ? `<span class="px-2 py-0.5 rounded-full bg-amber-100 text-amber-800">Pack</span>` : ""}
+            ${(a.promo_words || "").split(", ").filter(w => w && w !== "pack").slice(0, 3).map(w => `<span class="px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">${esc(w)}</span>`).join("")}
+          </div>
+          <p class="text-sm text-slate-700 whitespace-pre-line clamp" dir="auto" onclick="this.classList.toggle('clamp')" title="Cliquer pour tout afficher">${esc(a.text)}</p>
+          <div class="mt-auto pt-1 flex gap-3 text-xs font-medium">
+            <a class="text-blue-700 hover:underline" href="${safeUrl(a.link)}" target="_blank" rel="noopener">Voir la publicité</a>
+            ${a.landing ? `<a class="text-blue-700 hover:underline" href="${safeUrl(a.landing)}" target="_blank" rel="noopener">Page produit</a>` : ""}
+          </div>
+        </div>
+      </article>`).join("") || `<div class="text-sm text-slate-500">Aucune publicité ne correspond à ces filtres.</div>`;
+  }
+  ["a-q", "a-price", "a-pack", "a-promo", "a-known"].forEach(i => $(i).addEventListener("input", renderAds));
+  renderAds();
+
+  /* ---------- PACKS ---------- */
+  const firstLine = t => (String(t || "").split("\n").find(l => l.trim().length > 3) || "").slice(0, 110);
+  const adPacks = D.ads.filter(a => a.is_pack && a.new_price).map(a => ({shop: advName(a), own: a.competitor === D.reference, name: firstLine(a.text),
+    price: a.new_price, regular: a.old_price, discount: a.old_price ? Math.round((a.old_price - a.new_price) / a.old_price * 1000) / 10 : null,
+    url: a.link, image: a.image, src: "pub", detail: a.text}));
+  const PACKS = D.packs.map(p => ({...p, src: "site"})).concat(adPacks);
+  $("k-shop").innerHTML += [...new Set(PACKS.filter(p => !p.own).map(p => p.shop))].sort().map(s => `<option>${esc(s)}</option>`).join("");
+  function renderPacks() {
+    const q = norm($("k-q").value), sh = $("k-shop").value, src = $("k-src").value, s = $("k-sort").value;
+    const rows = PACKS.filter(p => ($("k-own").checked || !p.own) && (!sh || p.shop === sh) && (!src || p.src === src) && (!q || norm(p.name + " " + p.shop + " " + (p.detail || "")).includes(q)));
+    rows.sort(s === "asc" ? (a, b) => a.price - b.price : s === "desc" ? (a, b) => b.price - a.price : (a, b) => (b.discount || 0) - (a.discount || 0) || a.price - b.price);
+    $("k-count").textContent = rows.length + " pack(s)";
+    $("k-grid").innerHTML = rows.slice(0, 400).map(p => `
+      <article class="bg-white rounded-xl border ${p.own ? "border-blue-300" : "border-slate-200"} overflow-hidden flex flex-col">
+        ${p.image ? `<img src="${esc(p.image)}" alt="" loading="lazy" referrerpolicy="no-referrer" class="w-full aspect-square object-contain bg-white">` : `<div class="w-full aspect-[4/3] bg-slate-100"></div>`}
+        <div class="p-3 flex flex-col gap-1.5 grow border-t border-slate-100">
+          <div class="flex items-center justify-between gap-2 text-xs"><span class="font-semibold ${p.own ? "text-blue-700" : "text-slate-500"}">${esc(p.shop)}</span>
+            <span class="px-1.5 py-0.5 rounded ${p.src === "pub" ? "bg-violet-100 text-violet-700" : "bg-slate-100 text-slate-600"}">${p.src === "pub" ? "Publicité" : "Site web"}</span></div>
+          <a class="text-sm font-medium leading-snug hover:underline" dir="auto" href="${safeUrl(p.url)}" target="_blank" rel="noopener">${esc(p.name)}</a>
+          ${p.detail ? `<p class="text-xs text-slate-600 whitespace-pre-line clamp" dir="auto" onclick="this.classList.toggle('clamp')">${esc(p.detail)}</p>` : ""}
+          <div class="mt-auto pt-1 flex items-baseline gap-2"><span class="text-lg font-bold num">${dt(p.price)}</span>
+            ${p.regular ? `<s class="text-sm text-slate-400 num">${dt(p.regular)}</s>` : ""}
+            ${p.discount ? `<span class="ml-auto px-2 py-0.5 rounded-full bg-red-100 text-red-700 text-xs font-semibold">−${Math.round(p.discount)} %</span>` : ""}</div>
+        </div>
+      </article>`).join("") || `<div class="text-sm text-slate-500">Aucun pack ne correspond à ces filtres.</div>`;
+  }
+  ["k-q", "k-shop", "k-src", "k-sort", "k-own"].forEach(i => $(i).addEventListener("input", renderPacks));
+  renderPacks();
+
+  /* ---------- LOG ---------- */
+  const M = {shopify: "Shopify", woocommerce: "WooCommerce", generic: "Lecture des pages", vendure: "API boutique"};
+  $("l-rows").innerHTML = D.log.map(r => `<tr class="border-t border-slate-100">
+    <td class="px-4 py-2 font-medium">${esc(r.shop)}</td><td class="px-4 py-2">${esc(M[r.method] || "—")}</td>
+    <td class="px-4 py-2 text-right num">${r.products}</td><td class="px-4 py-2 text-right num">${r.in_stock}</td>
+    <td class="px-4 py-2 text-slate-500">${esc(r.day)}</td>
+    <td class="px-4 py-2 ${r.products ? "text-slate-500" : "text-red-600"}">${esc(r.error || (r.products ? "OK" : ""))}</td></tr>`).join("");
+  $("l-note").textContent = "Une boutique à 0 produit n'a pas pu être lue automatiquement.";
+
+  const tabs = document.querySelectorAll(".tab");
+  tabs[0].textContent += ` (${D.products.length})`; tabs[1].textContent += ` (${D.ads.filter(a => a.competitor).length})`; tabs[2].textContent += ` (${PACKS.filter(p => !p.own).length})`;
+}
+</script>
+</body>
+</html>

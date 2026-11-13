@@ -1,0 +1,9 @@
+.venv/
+__pycache__/
+exports/
+data/run.log
+site/
+dashboard.py
+dashboard.bat
+test_3_shops.bat
+data/benchmark.db

@@ -1,0 +1,55 @@
+# House Nutrition competitor list — edit freely.
+# url: shop website (leave empty if Facebook-only)
+# fb_name: name of the Facebook page as it appears in the Meta Ad Library (used to attach ads)
+# selectors (optional): only needed if a site isn't read automatically, e.g.
+#   selectors: {name: "h1.product-title", price: ".current-price", old_price: ".regular-price"}
+
+reference:
+  name: House Nutrition
+  url: https://www.housenutrition.tn
+  fb_name: House Nutrition
+
+competitors:
+  - {name: Strong Nutrition,      url: https://strong-nutrition.tn,        fb_name: Strong Nutrition Tunisia}
+  - {name: Muscle Nutrition,      url: https://muscle-nutrition.com,       fb_name: Muscle Nutrition}
+  - {name: Croco Nutrition,       url: https://crocostore.tn,              fb_name: Croco nutrition}
+  - {name: Vitamin Shop Tunisia,  url: https://vitaminshop.tn,             fb_name: Vitamin Shop Tunisia}
+  - {name: NRJbox,                url: https://nrjbox.tn,                  fb_name: NRJbox.tn}
+  - {name: Pazario,               url: https://pazario.tn,                 fb_name: Pazario.Tn}
+  - {name: Impact Nutrition,      url: https://www.impactnutrition.com.tn, fb_name: Impact Nutrition, brand: Impact Sport Nutrition}
+  - {name: Nutribeast,            url: https://nutribeast.tn,              fb_name: Nutribeast}
+  - {name: Doodi's Gym Pro,       url: https://gympro.tn,                  fb_name: Doodi's Gym Pro}
+  - {name: Aecor,                 url: https://aecor.tn,                   fb_name: Aecor}
+  - {name: Protein.tn,            url: https://protein.tn,                 fb_name: Protein.tn}
+  - {name: SF Nutrition,          url: https://sf-nutrition.tn,            fb_name: Sport and Fitness Nutrition}
+  - {name: GainLab Nutrition,     url: https://gainlabnutrition.com,       fb_name: GainLab Nutrition}
+  - {name: Nutrixpro,             url: https://nutrixpro.tn,               fb_name: Nutrixpro}
+  - {name: Nivo,                  url: https://nivo.tn,                    fb_name: Nivo}
+  - {name: Body Shop Nutrition,   url: https://body-shop.tn,               fb_name: Body Shop Nutrition}
+  - {name: Protein Shop Tunisia,  url: https://protein-shop-tunisia.tn,    fb_name: Protein Shop Tunisia}
+  - {name: Stock X Nutrition,     url: https://stock-x-nutrition.tn,       fb_name: Stock X Nutrition}
+  - {name: Go Hard Nutrition,     url: https://www.gohardnutrition.tn,     fb_name: Go Hard Nutrition}
+  - {name: Mahdia Nutrition,      url: "",                                fb_name: Mahdia Nutrition}      # website unknown — add it if they have one
+  - {name: Papeye's Nutrition,    url: "",                                fb_name: Papeye's Nutrition}    # IG papeyes.nutrition.tn; store on Converty — add URL when known
+
+# Keywords searched in the Meta Ad Library (Tunisia, active ads) every day.
+# Every supplement advertiser found is stored; unknown ones show up as "new competitors".
+ad_keywords:
+  - whey
+  - pack whey
+  - créatine
+  - creatine
+  - mass gainer
+  - protéine
+  - pre workout
+  - بروتين
+  - complément alimentaire
+  - white friday
+  - black friday
+
+settings:
+  delay_seconds: [0.5, 1.2]      # random pause between requests to the same shop
+  parallel_shops: 8              # shops read at the same time
+  max_pages_generic: 1500        # max product pages read per competitor site when no API is available
+  max_pages_reference: 800       # House Nutrition: read the full catalogue
+  ad_scrolls: 8                  # how far to scroll each Ad Library search
