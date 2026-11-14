@@ -4,6 +4,13 @@ on:
   schedule:
     - cron: "23 4 * * *"      # every day ~05:23 Tunis time
   workflow_dispatch: {}        # "Run workflow" button for a manual run
+  push:                        # also runs when the code or the competitor list is changed
+    branches: [main]
+    paths: ["**.py", "competitors.yaml", "requirements.txt", ".github/workflows/daily.yml"]
+
+concurrency:
+  group: scrape
+  cancel-in-progress: false
 
 permissions:
   contents: write
@@ -32,4 +39,5 @@ jobs:
           git config user.email "hn-bot@users.noreply.github.com"
           git add -A data docs
           git commit -m "Daily data $(date +%F)" || echo "nothing to commit"
+          git pull --rebase -X theirs || true
           git push

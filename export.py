@@ -8,7 +8,7 @@ import json
 import re
 from pathlib import Path
 
-from match import match_all, prep
+from match import load_library, match_all, prep, save_library
 
 SUPP = re.compile(r"whey|prot[ée]in|cr[ée]atine|gainer|bcaa|eaa|amino|vitamin|omega|pre.?workout|mass|isolate|"
                   r"collag|glutamin|br[uû]leur|burner|booster|zinc|magn[ée]sium|ashwagandha|cas[ée]in|carnitin|"
@@ -28,7 +28,10 @@ def export_site(con, cfg, site: Path):
     comp_all = prep([r for r in rows if not r["is_reference"]])
     hn = sorted([r for r in hn_all if r["in_stock"] and not r["is_pack"]], key=lambda r: r["name"].lower())
     comp = [r for r in comp_all if r["in_stock"]]
-    matches = match_all(hn, [c for c in comp if not c["is_pack"]]) if hn else {}
+    library = load_library()
+    matches = match_all(hn, [c for c in comp if not c["is_pack"]], library=library) if hn else {}
+    if matches:
+        save_library(library)
 
     products = [{"name": h["name"], "brand": h["brand"], "price": h["price"], "regular": h["regular_price"],
                  "url": h["url"], "image": h["image"], "matches": matches.get(i, [])} for i, h in enumerate(hn)]

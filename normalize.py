@@ -1,4 +1,5 @@
 """Name / size / brand normalization used for matching (no AI)."""
+import html
 import re
 import unicodedata
 
@@ -15,8 +16,8 @@ BRANDS = [
 GENERIC_BRAND_WORDS = {"nutrition", "sport", "sports", "labs", "lab", "usa", "series", "signature", "the"}
 
 _SIZE = re.compile(r"(\d+(?:[.,]\d+)?)\s*(kg|kgs|g|gr|grs|gramme?s?|lbs?|livres?|ml|l)\b")
-_COUNT = re.compile(r"(\d+)\s*(caps?|capsules?|gel+ules?|tabs?|tablets?|comprimes?|softgels?|"
-                    r"packs?|sachets?|servings?|doses?|vcaps?|pieces?|pcs)\b")
+_COUNT = re.compile(r"(\d+)\s*(caps?|capsules?|gel+ules?|tabs?|tablets?|comprimes?|softgels?|chewables?|chews?|"
+                    r"packs?|paks?|sachets?|servings?|serv|doses?|vcaps?|pieces?|pcs|shots?)\b")
 PACK = re.compile(r"(?<!\d)(?<!\d\s)\bpacks?\b(?!\s*$)|^\s*packs?\b|\bbundle\b|\bcombo\b|\bduo\b|\btrio\b|\s\+\s|\boffert[es]?\b|\b1\s?\+\s?1\b", re.I)
 
 
@@ -25,13 +26,15 @@ def strip_accents(s: str) -> str:
 
 
 def clean(s: str) -> str:
-    s = strip_accents((s or "").lower())
+    s = strip_accents(html.unescape(s or "").lower())
+    s = re.sub(r"(\d),(\d)", r"\1.\2", s)                # French decimal comma: 2,5 kg -> 2.5 kg
+    s = re.sub(r"\b([a-z]{3,})[ -](\d)\b", r"\1\2", s)     # lipo 6 / lipo-6 -> lipo6
     s = re.sub(r"[–—\-|/(),:®™’'`]", " ", s)
     return re.sub(r"\s+", " ", s).strip()
 
 
 def size_grams(name: str):
-    m = _SIZE.search(clean(name).replace(" ,", ","))
+    m = _SIZE.search(clean(name))
     if not m:
         return None
     v = float(m.group(1).replace(",", "."))
