@@ -16,8 +16,11 @@ git config user.name "killer7wayes-lab"
 git config user.email "killer7wayes-lab@users.noreply.github.com"
 git remote remove origin >nul 2>&1
 git remote add origin %REPO%
+rem take GitHub's history first (it commits data every day), then put this PC's files on top
+git fetch origin main >nul 2>&1
+git rev-parse --verify origin/main >nul 2>&1 && git reset --mixed origin/main >nul
 git add -A
-git commit -m "House Nutrition competitor benchmark" 
+git commit -m "Update from PC %date% %time:~0,5%" 
 git branch -M main
 echo.
 echo Pushing to GitHub - a sign-in window may open: sign in and click Authorize.
