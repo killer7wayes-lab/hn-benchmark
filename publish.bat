@@ -19,6 +19,8 @@ git remote add origin %REPO%
 rem take GitHub's history first (it commits data every day), then put this PC's files on top
 git fetch origin main >nul 2>&1
 git rev-parse --verify origin/main >nul 2>&1 && git reset --mixed origin/main >nul
+rem GitHub collects the data every day: keep its data, send only this PC's code and settings
+git rev-parse --verify origin/main >nul 2>&1 && git checkout origin/main -- data docs/data.js docs/ads >nul 2>&1
 git add -A
 git commit -m "Update from PC %date% %time:~0,5%" 
 git branch -M main

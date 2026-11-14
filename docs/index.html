@@ -14,23 +14,23 @@
 </style>
 </head>
 <body class="bg-slate-50 text-slate-900">
-<header class="bg-white border-b border-slate-200 sticky top-0 z-10">
+<header class="bg-white border-b border-slate-200 md:sticky top-0 z-10">
   <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap items-center gap-3">
     <div class="mr-auto">
       <h1 class="text-lg font-bold leading-tight">House Nutrition <span class="font-normal text-slate-500">· Veille concurrence</span></h1>
       <p id="updated" class="text-xs text-slate-500"></p>
     </div>
-    <nav class="flex flex-wrap gap-1 text-sm" role="tablist">
-      <button class="tab px-3 py-1.5 rounded-lg bg-slate-100" role="tab" data-tab="prix" aria-selected="true">Comparatif prix</button>
-      <button class="tab px-3 py-1.5 rounded-lg bg-slate-100" role="tab" data-tab="ads" aria-selected="false">Publicités actives</button>
-      <button class="tab px-3 py-1.5 rounded-lg bg-slate-100" role="tab" data-tab="packs" aria-selected="false">Packs concurrents</button>
-      <button class="tab px-3 py-1.5 rounded-lg bg-slate-100" role="tab" data-tab="log" aria-selected="false">Collecte</button>
-      <button class="tab px-3 py-1.5 rounded-lg bg-slate-100" role="tab" data-tab="reglages" aria-selected="false">Réglages</button>
+    <nav class="flex gap-1 text-sm overflow-x-auto whitespace-nowrap max-w-full pb-1 -mb-1" role="tablist">
+      <button class="tab shrink-0 px-3 py-1.5 rounded-lg bg-slate-100" role="tab" data-tab="prix" aria-selected="true">Comparatif prix</button>
+      <button class="tab shrink-0 px-3 py-1.5 rounded-lg bg-slate-100" role="tab" data-tab="ads" aria-selected="false">Publicités actives</button>
+      <button class="tab shrink-0 px-3 py-1.5 rounded-lg bg-slate-100" role="tab" data-tab="packs" aria-selected="false">Packs concurrents</button>
+      <button class="tab shrink-0 px-3 py-1.5 rounded-lg bg-slate-100" role="tab" data-tab="log" aria-selected="false">Collecte</button>
+      <button class="tab shrink-0 px-3 py-1.5 rounded-lg bg-slate-100" role="tab" data-tab="reglages" aria-selected="false">Réglages</button>
     </nav>
   </div>
 </header>
 
-<main class="max-w-7xl mx-auto px-4 py-5">
+<main class="max-w-7xl mx-auto px-3 sm:px-4 py-4 sm:py-5">
   <div id="nodata" class="hidden bg-amber-50 border border-amber-200 rounded-xl p-6 text-amber-900">
     Aucune donnée pour l'instant. Lancez <b>run.bat</b> puis rechargez cette page.
   </div>
@@ -40,15 +40,15 @@
     <div id="stats" class="grid grid-cols-2 md:grid-cols-5 gap-3 mb-4"></div>
     <div class="bg-white rounded-xl border border-slate-200 p-3 mb-3 flex flex-wrap gap-2 items-center text-sm">
       <input id="p-q" type="search" placeholder="Rechercher un produit…" class="border border-slate-300 rounded-lg px-3 py-1.5 w-full sm:w-64">
-      <select id="p-filter" class="border border-slate-300 rounded-lg px-2 py-1.5">
+      <select id="p-filter" class="border border-slate-300 rounded-lg px-2 py-1.5 flex-1 min-w-[45%] sm:flex-none sm:min-w-0">
         <option value="all">Tous les produits</option>
         <option value="more">HN plus cher</option>
         <option value="less">HN moins cher</option>
         <option value="same">Même prix</option>
         <option value="none">Sans concurrent trouvé</option>
       </select>
-      <select id="p-brand" class="border border-slate-300 rounded-lg px-2 py-1.5"><option value="">Toutes les marques</option></select>
-      <select id="p-sort" class="border border-slate-300 rounded-lg px-2 py-1.5">
+      <select id="p-brand" class="border border-slate-300 rounded-lg px-2 py-1.5 flex-1 min-w-[45%] sm:flex-none sm:min-w-0"><option value="">Toutes les marques</option></select>
+      <select id="p-sort" class="border border-slate-300 rounded-lg px-2 py-1.5 flex-1 min-w-[45%] sm:flex-none sm:min-w-0">
         <option value="gap">Tri : écart (HN le plus cher d'abord)</option>
         <option value="name">Tri : nom</option>
         <option value="shops">Tri : nombre de concurrents</option>
@@ -84,17 +84,17 @@
   <section id="tab-packs" class="hidden">
     <div class="bg-white rounded-xl border border-slate-200 p-3 mb-3 flex flex-wrap gap-2 items-center text-sm">
       <input id="k-q" type="search" placeholder="Rechercher un pack…" class="border border-slate-300 rounded-lg px-3 py-1.5 w-full sm:w-64">
-      <select id="k-shop" class="border border-slate-300 rounded-lg px-2 py-1.5"><option value="">Toutes les boutiques</option></select>
-      <select id="k-src" class="border border-slate-300 rounded-lg px-2 py-1.5">
+      <select id="k-shop" class="border border-slate-300 rounded-lg px-2 py-1.5 flex-1 min-w-[45%] sm:flex-none sm:min-w-0"><option value="">Toutes les boutiques</option></select>
+      <select id="k-src" class="border border-slate-300 rounded-lg px-2 py-1.5 flex-1 min-w-[45%] sm:flex-none sm:min-w-0">
         <option value="">Sites + publicités</option><option value="site">Sites web</option><option value="pub">Publicités</option>
       </select>
-      <select id="k-sort" class="border border-slate-300 rounded-lg px-2 py-1.5">
+      <select id="k-sort" class="border border-slate-300 rounded-lg px-2 py-1.5 flex-1 min-w-[45%] sm:flex-none sm:min-w-0">
         <option value="disc">Tri : plus grosse remise</option><option value="asc">Tri : prix croissant</option><option value="desc">Tri : prix décroissant</option>
       </select>
       <label class="flex items-center gap-1.5"><input id="k-own" type="checkbox"> Afficher aussi les packs House Nutrition</label>
       <span id="k-count" class="ml-auto text-slate-500"></span>
     </div>
-    <div id="k-grid" class="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"></div>
+    <div id="k-grid" class="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4"></div>
   </section>
 
   <!-- LOG -->
@@ -102,9 +102,9 @@
     <div class="bg-white rounded-xl border border-slate-200 overflow-x-auto">
       <table class="w-full text-sm">
         <thead class="bg-slate-50 text-xs uppercase text-slate-500"><tr>
-          <th class="text-left px-4 py-2">Boutique</th><th class="text-left px-4 py-2">Méthode</th>
+          <th class="text-left px-3 sm:px-4 py-2">Boutique</th><th class="text-left px-4 py-2 hidden sm:table-cell">Méthode</th>
           <th class="text-right px-4 py-2">Produits</th><th class="text-right px-4 py-2">En stock</th>
-          <th class="text-left px-4 py-2">Date</th><th class="text-left px-4 py-2">Remarque</th></tr></thead>
+          <th class="text-left px-4 py-2 hidden sm:table-cell">Date</th><th class="text-left px-4 py-2">Remarque</th></tr></thead>
         <tbody id="l-rows"></tbody>
       </table>
     </div>
@@ -191,17 +191,17 @@ else {
         <summary class="grid grid-cols-12 gap-2 px-4 py-2.5 items-center text-sm hover:bg-slate-50">
           <div class="col-span-12 md:col-span-5"><a class="font-medium hover:underline" href="${safeUrl(v.p.url)}" target="_blank" rel="noopener" onclick="event.stopPropagation()">${esc(v.p.name)}</a>
             ${v.p.brand ? `<span class="text-xs text-slate-400 ml-1">${esc(v.p.brand)}</span>` : ""}</div>
-          <div class="col-span-4 md:col-span-2 md:text-right font-semibold num">${dt(v.p.price)}</div>
-          <div class="col-span-8 md:col-span-3">${v.best ? `<span class="num font-semibold">${dt(v.best.price)}</span> <span class="text-slate-500">· ${esc(v.best.shop)}</span>${v.ms.length > 1 ? ` <span class="text-xs text-slate-400">+${v.ms.length - 1}</span>` : ""}` : `<span class="text-slate-400">Aucun concurrent trouvé</span>`}</div>
+          <div class="col-span-4 md:col-span-2 md:text-right font-semibold num"><span class="md:hidden block text-[10px] font-normal uppercase tracking-wide text-slate-400">Prix HN</span>${dt(v.p.price)}</div>
+          <div class="col-span-8 md:col-span-3"><span class="md:hidden block text-[10px] uppercase tracking-wide text-slate-400">Moins cher ailleurs</span>${v.best ? `<span class="num font-semibold">${dt(v.best.price)}</span> <span class="text-slate-500">· ${esc(v.best.shop)}</span>${v.ms.length > 1 ? ` <span class="text-xs text-slate-400">+${v.ms.length - 1}</span>` : ""}` : `<span class="text-slate-400">Aucun concurrent trouvé</span>`}</div>
           <div class="col-span-12 md:col-span-2 md:text-right">${gapBadge(v)}</div>
         </summary>
-        ${v.ms.length ? `<div class="px-4 pb-3"><table class="w-full text-xs bg-slate-50 rounded-lg overflow-hidden">
-          ${v.ms.map(m => { const g = v.p.price - m.price; return `<tr class="border-b border-white last:border-0">
-            <td class="px-3 py-1.5 font-medium whitespace-nowrap">${esc(m.shop)}</td>
-            <td class="px-3 py-1.5"><a class="hover:underline" href="${safeUrl(m.url)}" target="_blank" rel="noopener">${esc(m.name)}</a>${m.sure ? "" : ` <span class="px-1.5 rounded bg-amber-100 text-amber-800">à vérifier</span>`}</td>
-            <td class="px-3 py-1.5 text-right num whitespace-nowrap">${m.regular ? `<s class="text-slate-400">${dt(m.regular)}</s> ` : ""}<b>${dt(m.price)}</b></td>
-            <td class="px-3 py-1.5 text-right num whitespace-nowrap ${g >= 0.5 ? "text-red-600" : g <= -0.5 ? "text-emerald-600" : "text-slate-500"}">${g >= 0.5 ? "HN +" + dt(g) : g <= -0.5 ? "HN −" + dt(-g) : "="}</td></tr>`; }).join("")}
-        </table></div>` : ""}
+        ${v.ms.length ? `<div class="px-4 pb-3"><div class="bg-slate-50 rounded-lg divide-y divide-white text-xs">
+          ${v.ms.map(m => { const g = v.p.price - m.price; return `<div class="px-3 py-2 flex flex-wrap items-baseline gap-x-3 gap-y-0.5">
+            <span class="font-semibold">${esc(m.shop)}</span>
+            <span class="ml-auto num whitespace-nowrap">${m.regular ? `<s class="text-slate-400">${dt(m.regular)}</s> ` : ""}<b>${dt(m.price)}</b></span>
+            <span class="num whitespace-nowrap min-w-[5.5rem] text-right ${g >= 0.5 ? "text-red-600" : g <= -0.5 ? "text-emerald-600" : "text-slate-500"}">${g >= 0.5 ? "HN +" + dt(g) : g <= -0.5 ? "HN −" + dt(-g) : "même prix"}</span>
+            <a class="basis-full text-slate-600 hover:underline break-words" href="${safeUrl(m.url)}" target="_blank" rel="noopener">${esc(m.name)}${m.sure ? "" : ` <span class="px-1.5 rounded bg-amber-100 text-amber-800">à vérifier</span>`}</a></div>`; }).join("")}
+        </div></div>` : ""}
       </details>`).join("") || `<div class="p-6 text-sm text-slate-500">Aucun produit ne correspond à ces filtres.</div>`;
     $("p-note").textContent = `Écart = prix HN − prix du concurrent le moins cher. Rouge : HN est plus cher. Cliquez sur une ligne pour voir toutes les boutiques. Masqués car en rupture : ${D.hidden_out_of_stock.hn} produits HN, ${D.hidden_out_of_stock.competitors} produits concurrents.`;
   }
@@ -274,12 +274,12 @@ else {
     $("k-grid").innerHTML = rows.slice(0, 400).map(p => `
       <article class="bg-white rounded-xl border ${p.own ? "border-blue-300" : "border-slate-200"} overflow-hidden flex flex-col">
         ${p.image ? `<img src="${esc(p.image)}" alt="" loading="lazy" referrerpolicy="no-referrer" class="w-full aspect-square object-contain bg-white">` : `<div class="w-full aspect-[4/3] bg-slate-100"></div>`}
-        <div class="p-3 flex flex-col gap-1.5 grow border-t border-slate-100">
-          <div class="flex items-center justify-between gap-2 text-xs"><span class="font-semibold ${p.own ? "text-blue-700" : "text-slate-500"}">${esc(p.shop)}</span>
+        <div class="p-2.5 sm:p-3 flex flex-col gap-1.5 grow border-t border-slate-100 min-w-0">
+          <div class="flex flex-wrap items-center justify-between gap-1 text-xs"><span class="font-semibold ${p.own ? "text-blue-700" : "text-slate-500"}">${esc(p.shop)}</span>
             <span class="px-1.5 py-0.5 rounded ${p.src === "pub" ? "bg-violet-100 text-violet-700" : "bg-slate-100 text-slate-600"}">${p.src === "pub" ? "Publicité" : "Site web"}</span></div>
-          <a class="text-sm font-medium leading-snug hover:underline" dir="auto" href="${safeUrl(p.url)}" target="_blank" rel="noopener">${esc(p.name)}</a>
+          <a class="text-[13px] sm:text-sm font-medium leading-snug hover:underline break-words" dir="auto" href="${safeUrl(p.url)}" target="_blank" rel="noopener">${esc(p.name)}</a>
           ${p.detail ? `<p class="text-xs text-slate-600 whitespace-pre-line clamp" dir="auto" onclick="this.classList.toggle('clamp')">${esc(p.detail)}</p>` : ""}
-          <div class="mt-auto pt-1 flex items-baseline gap-2"><span class="text-lg font-bold num">${dt(p.price)}</span>
+          <div class="mt-auto pt-1 flex flex-wrap items-baseline gap-x-2"><span class="text-base sm:text-lg font-bold num">${dt(p.price)}</span>
             ${p.regular ? `<s class="text-sm text-slate-400 num">${dt(p.regular)}</s>` : ""}
             ${p.discount ? `<span class="ml-auto px-2 py-0.5 rounded-full bg-red-100 text-red-700 text-xs font-semibold">−${Math.round(p.discount)} %</span>` : ""}</div>
         </div>
@@ -291,9 +291,9 @@ else {
   /* ---------- LOG ---------- */
   const M = {shopify: "Shopify", woocommerce: "WooCommerce", generic: "Lecture des pages", vendure: "API boutique"};
   $("l-rows").innerHTML = D.log.map(r => `<tr class="border-t border-slate-100">
-    <td class="px-4 py-2 font-medium">${esc(r.shop)}</td><td class="px-4 py-2">${esc(M[r.method] || "—")}</td>
+    <td class="px-3 sm:px-4 py-2 font-medium">${esc(r.shop)}</td><td class="px-4 py-2 hidden sm:table-cell">${esc(M[r.method] || "—")}</td>
     <td class="px-4 py-2 text-right num">${r.products}</td><td class="px-4 py-2 text-right num">${r.in_stock}</td>
-    <td class="px-4 py-2 text-slate-500">${esc(r.day)}</td>
+    <td class="px-4 py-2 text-slate-500 hidden sm:table-cell">${esc(r.day)}</td>
     <td class="px-4 py-2 ${r.products ? "text-slate-500" : "text-red-600"}">${esc(r.error || (r.products ? "OK" : ""))}</td></tr>`).join("");
   $("l-note").textContent = "Une boutique à 0 produit n'a pas pu être lue automatiquement.";
 

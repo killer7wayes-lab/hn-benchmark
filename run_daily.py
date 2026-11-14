@@ -49,9 +49,10 @@ def attribute(card, shops):
     for s in shops:
         if land and s.get("url") and domain(s["url"]) == land:
             return s["name"]
+    squash = lambda t: t.replace(" ", "")
     for s in shops:
         for n in (clean(s.get("fb_name") or ""), clean(s["name"])):
-            if n and adv and (n == adv or n in adv or adv in n):
+            if n and adv and (n == adv or n in adv or adv in n or squash(n) == squash(adv)):
                 return s["name"]
     return ""
 

@@ -16,6 +16,15 @@ SUPP = re.compile(r"whey|prot[ée]in|cr[ée]atine|gainer|bcaa|eaa|amino|vitamin|
 LATEST = "day = (SELECT MAX(day) FROM {t} t2 WHERE t2.shop = {t}.shop)"
 
 
+def _now():
+    """Tunis time, wherever the script runs (GitHub's servers are on UTC)."""
+    try:
+        from zoneinfo import ZoneInfo
+        return dt.datetime.now(ZoneInfo("Africa/Tunis"))
+    except Exception:
+        return dt.datetime.utcnow() + dt.timedelta(hours=1)
+
+
 def export_site(con, cfg, site: Path):
     site.mkdir(exist_ok=True)
     ref_name = cfg["reference"]["name"]
@@ -57,7 +66,7 @@ def export_site(con, cfg, site: Path):
                         "error": "pas de site web (suivi par les publicités)" if not c.get("url") else "pas encore collecté"})
 
     data = {
-        "updated": dt.datetime.now().strftime("%d/%m/%Y %H:%M"),
+        "updated": _now().strftime("%d/%m/%Y %H:%M"),
         "reference": ref_name,
         "products": products, "packs": packs, "ads": ads, "log": log,
         "hidden_out_of_stock": {"hn": sum(1 for r in hn_all if not r["in_stock"]),
