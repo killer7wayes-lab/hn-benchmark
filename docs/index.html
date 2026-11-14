@@ -42,6 +42,7 @@
       <input id="p-q" type="search" placeholder="Rechercher un produit…" class="border border-slate-300 rounded-lg px-3 py-1.5 w-full sm:w-64">
       <select id="p-filter" class="border border-slate-300 rounded-lg px-2 py-1.5 flex-1 min-w-[45%] sm:flex-none sm:min-w-0">
         <option value="all">Tous les produits</option>
+        <option value="with">Avec un concurrent</option>
         <option value="more">HN plus cher</option>
         <option value="less">HN moins cher</option>
         <option value="same">Même prix</option>
@@ -175,13 +176,19 @@ else {
     const all = D.products.map(view);
     const withC = all.filter(v => v.best);
     const more = withC.filter(v => v.gap >= 0.5).length, less = withC.filter(v => v.gap <= -0.5).length;
-    const tile = (n, l, c = "") => `<div class="bg-white rounded-xl border border-slate-200 p-3"><div class="text-2xl font-bold num ${c}">${n}</div><div class="text-xs text-slate-500">${l}</div></div>`;
-    $("stats").innerHTML = tile(all.length, "produits HN en stock") + tile(withC.length, "comparés à un concurrent")
-      + tile(more, "HN plus cher", "text-red-600") + tile(less, "HN moins cher", "text-emerald-600")
-      + tile(withC.length - more - less, "au même prix");
+    const cur = $("p-filter").value;
+    const tile = (n, l, f, c = "") => `<button type="button" data-f="${f}" title="Afficher seulement ces produits" class="text-left bg-white rounded-xl border p-3 hover:border-slate-400 ${cur === f ? "border-slate-900 ring-2 ring-slate-900" : "border-slate-200"}"><div class="text-2xl font-bold num ${c}">${n}</div><div class="text-xs text-slate-500">${l}</div></button>`;
+    $("stats").innerHTML = tile(all.length, "produits HN en stock", "all") + tile(withC.length, "comparés à un concurrent", "with")
+      + tile(more, "HN plus cher", "more", "text-red-600") + tile(less, "HN moins cher", "less", "text-emerald-600")
+      + tile(withC.length - more - less, "au même prix", "same");
+    $("stats").querySelectorAll("button").forEach(b => b.onclick = () => {
+      $("p-filter").value = (cur === b.dataset.f) ? "all" : b.dataset.f;      // second tap clears the filter
+      renderPrix();
+      $("p-rows").scrollIntoView({behavior: "smooth", block: "start"});
+    });
     const q = norm($("p-q").value), f = $("p-filter").value, br = $("p-brand").value, s = $("p-sort").value;
     let rows = all.filter(v => (!q || norm(v.p.name + " " + v.p.brand).includes(q)) && (!br || v.p.brand === br) && (
-      f === "all" || (f === "none" && !v.best) || (v.best && ((f === "more" && v.gap >= 0.5) || (f === "less" && v.gap <= -0.5) || (f === "same" && Math.abs(v.gap) < 0.5)))));
+      f === "all" || (f === "none" && !v.best) || (f === "with" && v.best) || (v.best && ((f === "more" && v.gap >= 0.5) || (f === "less" && v.gap <= -0.5) || (f === "same" && Math.abs(v.gap) < 0.5)))));
     rows.sort(s === "name" ? (a, b) => a.p.name.localeCompare(b.p.name)
       : s === "shops" ? (a, b) => b.ms.length - a.ms.length
       : (a, b) => (b.pct ?? -1e9) - (a.pct ?? -1e9));
