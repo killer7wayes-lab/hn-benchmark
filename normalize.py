@@ -57,7 +57,8 @@ def brand_of(name: str) -> str:
 
 
 def brand_key(brand: str):
-    return {t for t in clean(brand).split() if t not in GENERIC_BRAND_WORDS}
+    b = clean(brand).replace("biotechusa", "biotech").replace("bio tech", "biotech").replace("realpharm", "real pharm")
+    return {t for t in b.split() if t not in GENERIC_BRAND_WORDS}
 
 
 def core_name(name: str) -> str:
