@@ -122,6 +122,11 @@ def score(h, c):
         s = min(s, 78)                      # one generic word and no size: too weak
     if rel == 0 and h["_bkey"]:
         s = min(s, 78)                      # HN brand not found on the competitor product
+    # price sanity: a price far from HN's usually means another size or a variant, never automatic
+    ratio = c["price"] / h["price"] if h.get("price") else 1
+    lo, hi = (0.7, 1.45) if has_measure_h != has_measure_c else (0.6, 1.7)
+    if not lo <= ratio <= hi:
+        s = min(s, 78)
     return max(0, min(100, s))
 
 
@@ -160,7 +165,10 @@ def match_all(hn_rows, comp_rows, auto=80, review=62, library=None):
             known = library.get(h["url"], {}).get(shop)
             if known and (shop, known) in by_url:
                 cands = [c for c in by_url[(shop, known)] if (h["name"], shop, c["name"]) not in bad
-                         and not (h["_size"] and c["_size"] and abs(h["_size"] - c["_size"]) / max(h["_size"], c["_size"]) > 0.06)]
+                         and not (h["_size"] and c["_size"] and abs(h["_size"] - c["_size"]) / max(h["_size"], c["_size"]) > 0.06)
+                         and not (h["_count"] and c["_count"] and h["_count"] != c["_count"])
+                         and (0.7 if bool(h["_size"] or h["_count"]) != bool(c["_size"] or c["_count"]) else 0.6)
+                         <= c["price"] / h["price"] <= 1.7]
                 if cands:
                     best, best_score = min(cands, key=lambda c: c["price"]), 100
             for c in ([] if best else items):

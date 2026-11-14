@@ -34,9 +34,10 @@ def clean(s: str) -> str:
 
 
 def size_grams(name: str):
-    m = _SIZE.search(clean(name))
-    if not m:
+    found = list(_SIZE.finditer(clean(name)))
+    if not found:
         return None
+    m = found[-1]        # "Creatine 500 g - 150g": the last size is the variant actually sold
     v = float(m.group(1).replace(",", "."))
     unit = m.group(2)
     if unit.startswith("kg") or unit == "l":

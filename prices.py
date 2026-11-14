@@ -126,13 +126,48 @@ class Scraper:
                 regular = regular / div if regular is not None else None
                 brand = ", ".join(b.get("name", "") for b in (p.get("brands") or []))
                 img = (p.get("images") or [{}])[0].get("src", "")
-                r_ = row(BeautifulSoup(p.get("name", ""), "lxml").get_text(), price, regular,
-                         p.get("is_in_stock", True), p.get("permalink", ""), brand, img)
+                pname = BeautifulSoup(p.get("name", ""), "lxml").get_text()
+                # a product sold in several sizes shows only its lowest price: read each size separately
+                rng = pr.get("price_range") or {}
+                variants = p.get("variations") or []
+                if variants and rng and rng.get("min_amount") != rng.get("max_amount") and len(variants) <= 12:
+                    got = self._woo_variants(base, variants, pname, p.get("permalink", ""), brand, img)
+                    if got:
+                        out.extend(got)
+                        continue
+                r_ = row(pname, price, regular, p.get("is_in_stock", True), p.get("permalink", ""), brand, img)
                 if r_:
                     out.append(r_)
             if len(items) < 100:
                 break
         return out
+
+    def _woo_variants(self, base, variants, pname, url, brand, img):
+        rows, seen = [], set()
+        for v in variants:
+            try:
+                r = self._get(f"{base}/wp-json/wc/store/v1/products/{v.get('id')}")
+                if r.status_code != 200:
+                    return None
+                d = r.json()
+            except (requests.RequestException, ValueError):
+                return None
+            pr = d.get("prices", {}) or {}
+            div = 10 ** int(pr.get("currency_minor_unit", 0) or 0)
+            price, regular = num(pr.get("price")), num(pr.get("regular_price"))
+            if price is None:
+                continue
+            attrs = " ".join(str(a.get("value", "")) for a in (v.get("attributes") or []) if a.get("value"))
+            name = f"{pname} - {attrs.replace('-', ' ')}" if attrs else BeautifulSoup(d.get("name", pname), "lxml").get_text()
+            key = (price, name)
+            if key in seen:
+                continue
+            seen.add(key)
+            r_ = row(name, price / div, regular / div if regular is not None else None,
+                     d.get("is_in_stock", True), url, brand, img)
+            if r_:
+                rows.append(r_)
+        return rows
 
     # ---------- 2b. Vendure (GraphQL shop-api) ----------
     def vendure(self, base):
