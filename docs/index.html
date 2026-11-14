@@ -25,6 +25,7 @@
       <button class="tab px-3 py-1.5 rounded-lg bg-slate-100" role="tab" data-tab="ads" aria-selected="false">Publicités actives</button>
       <button class="tab px-3 py-1.5 rounded-lg bg-slate-100" role="tab" data-tab="packs" aria-selected="false">Packs concurrents</button>
       <button class="tab px-3 py-1.5 rounded-lg bg-slate-100" role="tab" data-tab="log" aria-selected="false">Collecte</button>
+      <button class="tab px-3 py-1.5 rounded-lg bg-slate-100" role="tab" data-tab="reglages" aria-selected="false">Réglages</button>
     </nav>
   </div>
 </header>
@@ -109,6 +110,18 @@
     </div>
     <p id="l-note" class="text-xs text-slate-500 mt-2"></p>
   </section>
+  <!-- REGLAGES -->
+  <section id="tab-reglages" class="hidden">
+    <div class="bg-white rounded-xl border border-slate-200 p-4 max-w-2xl">
+      <h2 class="font-semibold mb-1">Concurrents affichés</h2>
+      <p class="text-sm text-slate-500 mb-3">Décochez un concurrent pour le retirer du comparatif, des publicités et des packs. Le choix est enregistré sur cet appareil.</p>
+      <div class="flex gap-2 mb-3 text-sm">
+        <button id="s-all" class="px-3 py-1 rounded-lg border border-slate-300 hover:bg-slate-50">Tout cocher</button>
+        <button id="s-none" class="px-3 py-1 rounded-lg border border-slate-300 hover:bg-slate-50">Tout décocher</button>
+      </div>
+      <div id="s-list" class="grid sm:grid-cols-2 gap-x-6 gap-y-1.5 text-sm"></div>
+    </div>
+  </section>
 </main>
 
 <script src="data.js"></script>
@@ -122,7 +135,7 @@ const norm = s => String(s || "").toLowerCase().normalize("NFD").replace(/[̀-ͯ
 
 document.querySelectorAll(".tab").forEach(b => b.onclick = () => {
   document.querySelectorAll(".tab").forEach(x => x.setAttribute("aria-selected", x === b));
-  ["prix", "ads", "packs", "log"].forEach(t => $("tab-" + t).classList.toggle("hidden", t !== b.dataset.tab));
+  ["prix", "ads", "packs", "log", "reglages"].forEach(t => $("tab-" + t).classList.toggle("hidden", t !== b.dataset.tab));
 });
 
 const openTab = t => { const b = document.querySelector(`.tab[data-tab="${t}"]`); if (b) b.click(); };
@@ -135,9 +148,15 @@ else {
   D.ads = D.ads.filter(a => a.competitor || ((STRONG.test(a.text) || ADV_OK.test(a.advertiser)) && !ADV_NO.test(a.advertiser)));
   $("updated").textContent = "Mis à jour le " + D.updated + " · produits en rupture de stock exclus";
 
+  /* ---------- REGLAGES : concurrents masqués (enregistré dans ce navigateur) ---------- */
+  const KEY = "hn-hidden-shops";
+  let HIDDEN = new Set();
+  try { HIDDEN = new Set(JSON.parse(localStorage.getItem(KEY) || "[]")); } catch (e) {}
+  const saveHidden = () => { try { localStorage.setItem(KEY, JSON.stringify([...HIDDEN])); } catch (e) {} };
+
   /* ---------- PRIX ---------- */
   const view = p => {
-    const ms = p.matches.filter(m => m.sure || $("p-unsure").checked);
+    const ms = p.matches.filter(m => !HIDDEN.has(m.shop) && (m.sure || $("p-unsure").checked));
     const best = ms[0] || null;
     const gap = best ? p.price - best.price : null;
     return {p, ms, best, gap, pct: best ? gap / best.price * 100 : null};
@@ -192,16 +211,24 @@ else {
   /* ---------- ADS ---------- */
   let advFilter = "";
   const advName = a => a.competitor || a.advertiser || "Inconnu";
+  const priceList = a => [...new Set(String(a.prices || "").split(",").map(s => parseFloat(s)).filter(n => n > 0))];
+  function priceChip(a) {
+    const ps = priceList(a);
+    if (!ps.length) return "";
+    if (ps.length > 2)   /* several offers in one ad: list them instead of guessing one */
+      return `<span class="px-2 py-0.5 rounded-full bg-slate-200 text-slate-800 font-medium num" title="Plusieurs prix cités dans le texte de la publicité">Prix cités : ${ps.slice(0, 5).sort((x, y) => x - y).map(p => p.toLocaleString("fr-FR")).join(" · ")} DT</span>`;
+    return `<span class="px-2 py-0.5 rounded-full bg-slate-900 text-white font-semibold num">${a.old_price ? `<s class="opacity-60 font-normal">${dt(a.old_price)}</s> ` : ""}${dt(a.new_price)}</span>`;
+  }
   function renderAds() {
     const counts = {};
-    const pool = D.ads.filter(a => !$("a-known").checked || a.competitor);
+    const pool = D.ads.filter(a => !HIDDEN.has(a.competitor) && (!$("a-known").checked || a.competitor));
     pool.forEach(a => counts[advName(a)] = (counts[advName(a)] || 0) + 1);
     if (advFilter && !counts[advFilter]) advFilter = "";
     $("a-chips").innerHTML = Object.entries(counts).sort((a, b) => b[1] - a[1]).map(([n, c]) =>
       `<button data-adv="${esc(n)}" class="px-2.5 py-1 rounded-full text-xs border ${advFilter === n ? "bg-slate-900 text-white border-slate-900" : "bg-white border-slate-300 hover:border-slate-500"}">${esc(n)} <b>${c}</b></button>`).join("");
     $("a-chips").querySelectorAll("button").forEach(b => b.onclick = () => { advFilter = advFilter === b.dataset.adv ? "" : b.dataset.adv; renderAds(); });
     const q = norm($("a-q").value);
-    const rows = D.ads.filter(a => (!advFilter || advName(a) === advFilter) && (!q || norm(a.text + " " + a.advertiser).includes(q))
+    const rows = D.ads.filter(a => !HIDDEN.has(a.competitor) && (!advFilter || advName(a) === advFilter) && (!q || norm(a.text + " " + a.advertiser).includes(q))
       && (!$("a-price").checked || a.new_price) && (!$("a-pack").checked || a.is_pack)
       && (!$("a-promo").checked || a.old_price || a.discounts || /promo|solde|remise|friday|offre/.test(a.promo_words || ""))
       && (!$("a-known").checked || a.competitor));
@@ -216,7 +243,7 @@ else {
             ${a.competitor ? "" : `<span class="shrink-0 px-1.5 py-0.5 rounded bg-violet-100 text-violet-700 text-[10px] font-semibold">NON SUIVI</span>`}
           </div>
           <div class="flex flex-wrap gap-1 text-xs">
-            ${a.new_price ? `<span class="px-2 py-0.5 rounded-full bg-slate-900 text-white font-semibold num">${a.old_price ? `<s class="opacity-60 font-normal">${dt(a.old_price)}</s> ` : ""}${dt(a.new_price)}</span>` : ""}
+            ${priceChip(a)}
             ${a.discounts ? `<span class="px-2 py-0.5 rounded-full bg-red-100 text-red-700 font-semibold">${esc(a.discounts)}</span>` : ""}
             ${a.is_pack ? `<span class="px-2 py-0.5 rounded-full bg-amber-100 text-amber-800">Pack</span>` : ""}
             ${(a.promo_words || "").split(", ").filter(w => w && w !== "pack").slice(0, 3).map(w => `<span class="px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">${esc(w)}</span>`).join("")}
@@ -234,14 +261,14 @@ else {
 
   /* ---------- PACKS ---------- */
   const firstLine = t => (String(t || "").split("\n").find(l => l.trim().length > 3) || "").slice(0, 110);
-  const adPacks = D.ads.filter(a => a.is_pack && a.new_price).map(a => ({shop: advName(a), own: a.competitor === D.reference, name: firstLine(a.text),
+  const adPacks = D.ads.filter(a => a.is_pack && a.new_price && priceList(a).length <= 2).map(a => ({shop: advName(a), own: a.competitor === D.reference, name: firstLine(a.text),
     price: a.new_price, regular: a.old_price, discount: a.old_price ? Math.round((a.old_price - a.new_price) / a.old_price * 1000) / 10 : null,
     url: a.link, image: a.image, src: "pub", detail: a.text}));
   const PACKS = D.packs.map(p => ({...p, src: "site"})).concat(adPacks);
   $("k-shop").innerHTML += [...new Set(PACKS.filter(p => !p.own).map(p => p.shop))].sort().map(s => `<option>${esc(s)}</option>`).join("");
   function renderPacks() {
     const q = norm($("k-q").value), sh = $("k-shop").value, src = $("k-src").value, s = $("k-sort").value;
-    const rows = PACKS.filter(p => ($("k-own").checked || !p.own) && (!sh || p.shop === sh) && (!src || p.src === src) && (!q || norm(p.name + " " + p.shop + " " + (p.detail || "")).includes(q)));
+    const rows = PACKS.filter(p => !HIDDEN.has(p.shop) && ($("k-own").checked || !p.own) && (!sh || p.shop === sh) && (!src || p.src === src) && (!q || norm(p.name + " " + p.shop + " " + (p.detail || "")).includes(q)));
     rows.sort(s === "asc" ? (a, b) => a.price - b.price : s === "desc" ? (a, b) => b.price - a.price : (a, b) => (b.discount || 0) - (a.discount || 0) || a.price - b.price);
     $("k-count").textContent = rows.length + " pack(s)";
     $("k-grid").innerHTML = rows.slice(0, 400).map(p => `
@@ -269,6 +296,17 @@ else {
     <td class="px-4 py-2 text-slate-500">${esc(r.day)}</td>
     <td class="px-4 py-2 ${r.products ? "text-slate-500" : "text-red-600"}">${esc(r.error || (r.products ? "OK" : ""))}</td></tr>`).join("");
   $("l-note").textContent = "Une boutique à 0 produit n'a pas pu être lue automatiquement.";
+
+  /* settings list */
+  const SHOPS = D.log.map(r => r.shop).filter(s => s !== D.reference);
+  function renderSettings() {
+    $("s-list").innerHTML = SHOPS.map(s => `<label class="flex items-center gap-2 py-0.5"><input type="checkbox" data-shop="${esc(s)}" ${HIDDEN.has(s) ? "" : "checked"}> ${esc(s)}</label>`).join("");
+    $("s-list").querySelectorAll("input").forEach(i => i.onchange = () => { i.checked ? HIDDEN.delete(i.dataset.shop) : HIDDEN.add(i.dataset.shop); refresh(); });
+  }
+  function refresh() { saveHidden(); renderPrix(); renderAds(); renderPacks(); }
+  $("s-all").onclick = () => { HIDDEN.clear(); renderSettings(); refresh(); };
+  $("s-none").onclick = () => { SHOPS.forEach(s => HIDDEN.add(s)); renderSettings(); refresh(); };
+  renderSettings();
 
   const tabs = document.querySelectorAll(".tab");
   tabs[0].textContent += ` (${D.products.length})`; tabs[1].textContent += ` (${D.ads.filter(a => a.competitor).length})`; tabs[2].textContent += ` (${PACKS.filter(p => !p.own).length})`;
