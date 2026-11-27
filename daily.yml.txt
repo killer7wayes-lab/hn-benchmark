@@ -19,6 +19,8 @@ jobs:
   scrape:
     runs-on: ubuntu-latest
     timeout-minutes: 120
+    env:
+      GH_TOKEN: ${{ github.token }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -29,10 +31,28 @@ jobs:
         run: |
           pip install -r requirements.txt
           python -m playwright install --with-deps chromium
+      # The history database is over GitHub's 100 MB file limit, so it is kept as a file
+      # on the "data" release (compressed), not in the repo.
+      - name: Restore database
+        run: |
+          mkdir -p data
+          if gh release download data -p hn.db.gz -D data --clobber; then
+            gunzip -f data/hn.db.gz
+          else
+            echo "No saved database yet: starting from the last copy that was in the repo (2026-11-19)"
+            git fetch --depth=1 origin fff141dd70445757207185c7eaa6e19c535a47cc
+            git show fff141dd70445757207185c7eaa6e19c535a47cc:data/hn.db > data/hn.db
+          fi
+          ls -la data
       - name: Scrape prices + ads
         env:
           PRICE_MINUTES: "80"
         run: python run_daily.py
+      - name: Save database
+        run: |
+          gzip -kf data/hn.db
+          gh release view data > /dev/null 2>&1 || gh release create data --title "Database (hn.db)" --notes "History database, updated by the daily job. Kept here because it is too big for the repo."
+          gh release upload data data/hn.db.gz --clobber
       - name: Save results to the repo
         run: |
           git config user.name "hn-bot"
