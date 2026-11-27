@@ -7,3 +7,5 @@ dashboard.py
 dashboard.bat
 test_3_shops.bat
 data/benchmark.db
+data/hn.db
+data/*.db.gz
